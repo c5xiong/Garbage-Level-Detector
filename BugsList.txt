@@ -1,0 +1,11 @@
+-----BUG LIST-----
+
+	August 28th, 2019:
+		1. Bug: Traceback (most recent call last):
+		   File "TestGmailSendFuncs.py", line 1, in <module>
+    			from GmailSendFuncs.py import *
+  		   File "/Users/c5xiong/Arduino_Projects/Garbage-Level-Detector/GmailSendFuncs.py", line 4, in <module>
+    			import oauth2client
+			ModuleNotFoundError: No module named 'oauth2client'
+		   Solution: pip3 install --upgrade oauth2client
+		2. Quickstart won't work

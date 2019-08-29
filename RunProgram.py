@@ -11,16 +11,16 @@ subject = 'Trash is full'
 message_text = 'Throw away trash ASAP'
 
 while(1):
-    print "looping" 
+    print ("looping") 
     data = "Trash?" #Set data request to Temperature
  
    #client_socket.sendto( data, address) #Send the data requet
  
     try:
-        print "Currently Receiving" 
+        print ("Currently Receiving") 
         rec_data, addr = client_socket.recvfrom(2048) #Read response from arduino
         # temp = float(rec_data) #Convert string rec_data to float temp
-        print "Received data, send email" # Print the result
+        print ("Received data, send email") # Print the result
         if rec_data =="true":
                 x = messages.create_message(senderEmail, receiverEmail, subject, message_text)
                 messages.send(, , x)
@@ -30,6 +30,6 @@ while(1):
 
  
     except:
-        print "ERROR"
+        print ("ERROR")
         pass
 

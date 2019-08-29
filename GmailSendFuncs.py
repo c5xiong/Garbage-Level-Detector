@@ -11,6 +11,7 @@ import mimetypes
 from email.mime.image import MIMEImage
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
+from oauth2client import file 
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
 CLIENT_SECRET_FILE = 'client_secret.json'
@@ -128,9 +129,12 @@ def sendAndCreate():
     subject = "Testing Program"
     msgHtml = "Hi<br/>Html Email"
     msgPlain = "Hi\nPlain Email"
-    SendMessage(sender, to, subject, msgHtml, msgPlain)
+    print("LMAO")
+    print(SendMessage(sender, to, subject, msgHtml, msgPlain))
     # Send message with attachment: 
     # SendMessage(sender, to, subject, msgHtml, msgPlain, '/path/to/file.pdf')
+def printStuff():
+	print("printing from printStuff")
 
-#if __name__ == '__sendAndCreate__':
-#	sendAndCreate():
+if __name__ == '__sendAndCreate__':
+	sendAndCreate()
