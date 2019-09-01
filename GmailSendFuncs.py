@@ -129,7 +129,7 @@ def sendAndCreate():
     subject = "Testing Program"
     msgHtml = "Hi<br/>Html Email"
     msgPlain = "Hi\nPlain Email"
-    print("LMAO")
+    print("About to send")
     print(SendMessage(sender, to, subject, msgHtml, msgPlain))
     # Send message with attachment: 
     # SendMessage(sender, to, subject, msgHtml, msgPlain, '/path/to/file.pdf')
