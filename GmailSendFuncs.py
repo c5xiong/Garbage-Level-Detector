@@ -6,7 +6,7 @@ from oauth2client import client, tools
 import base64
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from apiclient import errors, discovery
+from googleapiclient import errors, discovery
 import mimetypes
 from email.mime.image import MIMEImage
 from email.mime.audio import MIMEAudio
@@ -63,12 +63,11 @@ def CreateMessageHtml(sender, to, subject, msgHtml, msgPlain):
     msg['To'] = to
     msg.attach(MIMEText(msgPlain, 'plain'))
     msg.attach(MIMEText(msgHtml, 'html'))
-    return {'raw': base64.urlsafe_b64encode(msg.as_string())}
+    return {'raw': base64.urlsafe_b64encode(msg.as_string().encode()).decode()}
 
 def createMessageWithAttachment(
     sender, to, subject, msgHtml, msgPlain, attachmentFile):
     """Create a message for an email.
-
     Args:
       sender: Email address of the sender.
       to: Email address of the receiver.
@@ -76,7 +75,6 @@ def createMessageWithAttachment(
       msgHtml: Html message to be sent
       msgPlain: Alternative plain text message for older email clients          
       attachmentFile: The path to the file to be attached.
-
     Returns:
       An object containing a base64url encoded email object.
     """
@@ -123,7 +121,7 @@ def createMessageWithAttachment(
     return {'raw': base64.urlsafe_b64encode(message.as_string().encode()).decode()}
 
 
-def sendAndCreate():
+def main():
     to = "chuguo14@gmail.com"
     sender = "testingScriptsEmail@gmail.com"
     subject = "Testing Program"
@@ -136,5 +134,5 @@ def sendAndCreate():
 def printStuff():
 	print("printing from printStuff")
 
-if __name__ == '__sendAndCreate__':
-	sendAndCreate()
+if __name__ == '__main__':
+	main()
