@@ -46,11 +46,6 @@
 
 			/* Style the tab content (and add height:100% for full page content) */
 			.tabcontent {
-				position: absolute;
-    				top: 50%;
-    				left: 50%;
-    				margin-top: -200px;
-    				margin-left: -200px;
 				color: white;
 				display: none;
 				padding: 100px 20px;
@@ -62,6 +57,37 @@
 			#Contact {background-color: blue;}
 			#About {background-color: orange;}
 		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script type="text/javascript">
+			/*HTMLFormElement.prototype._submit = HTMLFormElement.prototype.submit;
+
+			HTMLFormmElement.prototype.submit = function (){
+   				this._submit();
+				submitForm();
+			};*/
+		//	$(document).ready(function() {
+		// 	 $( "form" ).submit(function( event ) {					
+				 //event.preventDefault();
+				function submitForm(){
+					alert("ASDFASDF");
+				 $ajax({
+						url : "/processInput"
+          					data : {
+             					firstName : $('firstName').val()
+                 				},
+             					type : 'POST',
+						success: function(response){
+							alert("Successfully ajaxed");
+          						$('#output').text(data.output).show();
+						}
+						error: function(error){
+							alert("Ajax failed");
+						}
+            				});
+			 }
+		//		});
+		//	});
+		</script> 
 	</head>
 	<body>
 		<button class="tablink" onclick="openPage('Home', this, 'red')" id="defaultOpen">Home</button>
@@ -71,14 +97,48 @@
 		<div id="Home" class="tabcontent">
 			<h3>Home</h3>
 			<p>Home is where the heart is..</p>
-		<form name="form1" action='{{url_for('processInput') }}' method="post">
-			name:<input type ="text" name="EmailInput">
-			<input type="submit" value="add" >
-		</form>
+			<!-- Generate a randomizing order of people -->
+			<form class="form-inline" method="post" >
+			<!--First Name-->
+			<div class="form-group">
+				<label class="sr-only" for="firstName">First Name</label>
+				<input type="text" class="form-control" id="firstName" placeholder="First Name">
+			</div>
 
-			{% block content %}
-			{% include 'frontPage.html' %}
-			{% endblock %}
+			<!--Submit Button-->
+			<button class="btn btn-default" type="button"onclick="submitForm()">Submit</button>
+			</form>
+<!--		<script>
+			/*HTMLFormElement.prototype._submit = HTMLFormElement.prototype.submit;
+
+			HTMLFormmElement.prototype.submit = function (){
+   				this._submit();
+				submitForm();
+			};*/
+			$(document).ready(function() {
+		 	 $( "form" ).submit(function( event ) {					
+				 $ajax({
+						url : "/processInput"
+          					data : {
+             					firstName : $('firstName').val()
+                 				},
+             					type : 'POST',
+						success: function(response){
+							console.log("Successfully ajaxed");
+          						$('#output').text(data.output).show();
+						}
+						error: function(error){
+							console.log("Ajax failed");
+						}
+            				});
+				 event.preventDefault();
+				});
+			});
+</script> -->
+
+			</br>
+				<div id="output"></div>
+			</br>
 		</div>
 
 		<div id="News" class="tabcontent">

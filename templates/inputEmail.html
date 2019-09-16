@@ -1,8 +1,8 @@
 <html>
 	<body>
-		<form name="form1" action='{{url_for('processInput') }}' method="get">
-			name:<input type ="text" id="email" name="n">
-			<input type="submit" value="next" >
+		<form name="form1" action='{{url_for('processInput') }}' method="post">
+			name:<input type ="text" name="EmailInput">
+			<input type="submit" value="add" >
 		</form>
 	</body>
 </html>
