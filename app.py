@@ -27,15 +27,25 @@ def refreshList():
         soup = BeautifulSoup(fp)
     body = soup.find('body')
     aliveLists = soup.find('ol')
-    listTags = soup.new_tag('ol')
+    htmlList= "<ol>{0}<ol>"
     listOfEmails=["a","b","c"]
+    liFormat= "<li>{0}</li>"
+    liFormedList = [liFormat.format(a) for a in listOfEmails]
+    htmlList = htmlList.format("".join(liFormedList))
+    print(liFormedList)
+    print(htmlList)
+
     i = 0
-    for x in listOfEmails:
-        listTags.insert(i,listOfEmails[i])
-        ++i
     if str(aliveLists) != "None":
         print("Found an ol")
         soup.find('ol').decompose()
+
+    listTags = soup.new_tag('ol')
+    for x in listOfEmails:
+        itemTags = soup.new_tag('li')
+        itemTags.string = x
+        listTags.insert(i, itemTags)
+        ++i;
 
     body.insert(1, listTags)
 
