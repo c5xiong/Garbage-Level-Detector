@@ -2,15 +2,6 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-#Flask-Login always keeps track of the logged in user by storing the login's unique
-#identifier in Flask's user session which is a storage space that is assigned 
-#to each connected user. In short, whenever a user logs into the application, Flask
-#will retrive its id from this storage and load into memory. The loader is register
-# with @login.user_loader
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-
 class User(UserMixin,db.Model):
     #the variable name is a field while db.Integer/String/... is the field type
     id = db.Column(db.Integer, primary_key=True)
@@ -27,7 +18,7 @@ class User(UserMixin,db.Model):
         return '<User {}>'.format(self.username)   
 
 class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True)
     #body = db.Column(db.String(140))
     email = db.Column(db.String, primary_key=True)
     #timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)

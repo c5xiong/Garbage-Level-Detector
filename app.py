@@ -24,18 +24,23 @@ app.config['CELERY_BROKER_URL'] = 'amqp://localhost//'
 #This is to add the database for Celery to store its results into.
 app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
 celery = make_celery(app)
-
+scheduleOfEmails = []
 
 import models
 from form import LoginForm, RegistrationForm
 
+#Flask-Login always keeps track of the logged in user by storing the login's unique
+#identifier in Flask's user session which is a storage space that is assigned 
+#to each connected user. In short, whenever a user logs into the application, Flask
+#will retrive its id from this storage and load into memory. The loader is register
+# with @login.user_loader
+@login.user_loader
+def load_user(id):
+    return models.User.query.get(int(id))
+
 @app.shell_context_processor
 def make_shell_context():
     return {'db': db, 'User': models.User, 'Post': models.Post}
-
-@login.user_loader
-def load_user(user_id):
-    return None
 
 @app.route('/logout')
 def logout():
@@ -62,7 +67,7 @@ def logIn():
     #The current_user variable comes from Flask_Login
     #This if statement is designed to redirect user to home pg if already logged in
     if current_user.is_authenticated:
-        return redirect(url_for('/'))
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = models.User.query.filter_by(username=form.username.data).first()
@@ -84,9 +89,13 @@ def refreshList():
     body = soup.find('body')
     aliveLists = soup.find('ol')
     htmlList= "<ol>{0}<ol>"
-    listOfEmails=["a","b","c"]
+    queryEmails = current_user.listOfEmails.all()
+    totalEmails=[]
+    for a in queryEmails:
+        totalEmails.append(a.email)
+        scheduleOfEmails.append(a.email)
     liFormat= "<li>{0}</li>"
-    liFormedList = [liFormat.format(a) for a in listOfEmails]
+    liFormedList = [liFormat.format(a) for a in totalEmails]
     htmlList = htmlList.format("".join(liFormedList))
     print(liFormedList)
     print(htmlList)
@@ -97,7 +106,7 @@ def refreshList():
         soup.find('ol').decompose()
 
     listTags = soup.new_tag('ol')
-    for x in listOfEmails:
+    for x in totalEmails:
         itemTags = soup.new_tag('li')
         itemTags.string = x
         listTags.insert(i, itemTags)
@@ -120,6 +129,14 @@ def hello(n):
 def reverse(string):
     return string[::-1]
 
+@celery.task(name="Run Arduino")
+def runHardWare():
+    if scheduleOfEmails == []:
+        refreshList()
+    runArduino(scheduleOfEmails)
+    return
+    
+
 @app.route('/dataPage')
 def dataPage():
     return render_template('dataPage.html')
@@ -137,23 +154,43 @@ def processInput():
     index = 1
     x = request.form['EmailInput']
     print("The input is " + x)
+    u = models.User.query.get(current_user.id)
+    print(u)
+    addition = models.Post(email=x, author=u, id=x)
+    current_db_sessions=db.session.object_session(addition)
+    current_db_sessions.add(addition)
+    current_db_sessions.commit()
+
     return redirect(url_for('frontPage'))
 
 @app.route('/removeEmail', methods=['GET', 'POST'])
 def removeEmail():
+    x = request.form['EmailRemoval']
+    u = models.Post.query.all()
+    for p in u:
+        if(p.id == x):
+            current_db_sessions=db.session.object_session(p)
+            current_db_sessions.delete(p)
+            break
     refreshList()
     return redirect(url_for('frontPage'))
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    refreshList()
-    return render_template('parent.html')
+    if current_user.is_authenticated:
+        refreshList()
+        return render_template('parent.html')
+    else:
+        return render_template('logIn')
 
 @app.route('/frontPage', methods=['GET', 'POST'])
 def frontPage():
-    refreshList()
-    return render_template('parent.html')
+    if current_user.is_authenticated:
+        refreshList()
+        return render_template('parent.html')
+    else:
+        return render_template('logIn.html')
 
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
