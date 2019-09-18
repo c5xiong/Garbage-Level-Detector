@@ -64,10 +64,17 @@
 		</style>
 	</head>
 	<body>
+		<div>
+        		Garbage Scheduler:
+        			<a href="{{ url_for('frontPage') }}">Home</a>
+        		{% if current_user.is_anonymous %}
+        			<a href="{{ url_for('logIn') }}">Login</a>
+        		{% else %}
+        			<a href="{{ url_for('logout') }}">Logout</a>
+        		{% endif %}
+    		</div>
 		<button class="tablink" onclick="openPage('Home', this, 'red')" id="defaultOpen">Home</button>
 		<button class="tablink" onclick="openPage('News', this, 'green')" >News</button>
-		<button class="add" onclick="window.open('{{ url_for('inputEmail') }}', 'DataPg', 'width=300, height=500');return false;" > add </button>
-		<ul><li>Coffee</li><li>Tea</li></ul>
 		<div id="Home" class="tabcontent">
 			<h3>Home</h3>
 			<p>Home is where the heart is..</p>
@@ -75,6 +82,11 @@
 			name:<input type ="text" name="EmailInput">
 			<input type="submit" value="add" >
 		</form>
+		<form name="form2" action='{{url_for('removeEmail') }}' method="post">
+			name:<input type ="text" name="EmailInput">
+			<input type="submit" value="remove" >
+		</form>
+
 
 			{% block content %}
 			{% include 'frontPage.html' %}
