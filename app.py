@@ -1,4 +1,5 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, jsonify
+from collections import namedtuple
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from bs4 import BeautifulSoup,Tag
 from flask_celery import make_celery 
@@ -6,9 +7,9 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from scripts import * 
-import subprocess, json
-from flask import request
+import subprocess, json, time
 from werkzeug.urls import url_parse
+from celery.schedules import crontab
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -24,7 +25,14 @@ app.config['CELERY_BROKER_URL'] = 'amqp://localhost//'
 #This is to add the database for Celery to store its results into.
 app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
 celery = make_celery(app)
+
 scheduleOfEmails = []
+Person = namedtuple("Person", "email start finish")
+FutureTime = namedtuple("FutureTime", "year month day")
+calendar = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31,
+            "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11":
+            30, "12": 31}
+totalPeople=0
 
 import models
 from form import LoginForm, RegistrationForm
@@ -84,25 +92,48 @@ def logIn():
 
 login.login_view = 'logIn'
 def refreshList():
+    global totalPeople
     with open("./templates/frontPage.html") as fp:
         soup = BeautifulSoup(fp)
     body = soup.find('body')
     aliveLists = soup.find('ol')
     htmlList= "<ol>{0}<ol>"
+
     queryEmails = current_user.listOfEmails.all()
     totalEmails=[]
+    index = 0
     for a in queryEmails:
         totalEmails.append(a.email)
+
+        curtime = time.localtime(time.time())
+
+        day =curtime.tm_mday + 7
+        year = curtime.tm_year
+        month = curtime.tm_mon
+
+        if(day > calendar[str(month)]):
+            day = (calendar[str(month)] + day) - calendar[str(month)]
+            month+=1
+            if(month == 13):
+                month = month % 12
+                year+=1
+                
+        futureTime = FutureTime(year = year, month = month, day = day)
+        person = Person(email=a.email, start = curtime, finish = futureTime)
         scheduleOfEmails.append(a.email)
+        ++index
+
+    #If the numbers of emails changed, restart celery task
+    if totalPeople != index:
+        totalPeople = index
+        celery.purge()
+        runHardware.delay()
     liFormat= "<li>{0}</li>"
     liFormedList = [liFormat.format(a) for a in totalEmails]
     htmlList = htmlList.format("".join(liFormedList))
-    print(liFormedList)
-    print(htmlList)
 
     i = 0
     if str(aliveLists) != "None":
-        print("Found an ol")
         soup.find('ol').decompose()
 
     listTags = soup.new_tag('ol')
@@ -130,12 +161,20 @@ def reverse(string):
     return string[::-1]
 
 @celery.task(name="Run Arduino")
-def runHardWare():
+def runHardware():
+    
     if scheduleOfEmails == []:
         refreshList()
-    runArduino(scheduleOfEmails)
+    num = totalPeople
+    for email in scheduleOfEmails:
+        runArduino(email, --num)
+    scheduleOfEmails = []
     return
     
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(runHardware(), name='add every 10')
 
 @app.route('/dataPage')
 def dataPage():
@@ -186,6 +225,7 @@ def index():
 
 @app.route('/frontPage', methods=['GET', 'POST'])
 def frontPage():
+    totalPeople = 0
     if current_user.is_authenticated:
         refreshList()
         return render_template('parent.html')
