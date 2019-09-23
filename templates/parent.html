@@ -94,8 +94,11 @@
 		</div>
 
 		<div id="News" class="tabcontent">
-			<h3>News</h3>
-			<p>Some news this fine day!</p> 
+			<h3>Profile</h3>
+
+			{% with form=form %}
+				{% include 'Profile.html' %}
+			{% endwith %}
 		</div>
 
 		<script>

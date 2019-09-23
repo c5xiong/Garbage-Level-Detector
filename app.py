@@ -34,7 +34,7 @@ calendar = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31,
 totalPeople=0
 
 import models
-from form import LoginForm, RegistrationForm
+from form import LoginForm, RegistrationForm, EditProfileForm
 
 #Flask-Login always keeps track of the logged in user by storing the login's unique
 #identifier in Flask's user session which is a storage space that is assigned 
@@ -54,6 +54,20 @@ def logout():
     logout_user()
     return redirect(url_for('logIn'))
 
+@app.route('/EditProfile/', methods=['GET', 'POST'])
+def EditProfile():
+    x = EditProfileForm()
+    if x.validate_on_submit():
+        u = models.User.query.get(current_user.id)
+        if x.username.data is not "N/A":
+            u.set_username(x.username.data)
+        if x.password.data is not "N/A":
+            u.set_password(x.password.data)
+        if x.email.data is not "":
+            u.set_email(x.email.data)
+        flash("All changes complete")
+
+    return redirect(url_for('frontPage', form=x))
 @app.route('/register', methods=['GET','POST'])
 def register():
     if current_user.is_authenticated:
@@ -251,18 +265,20 @@ def removeEmail():
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
+    form1 = EditProfileForm() 
     if current_user.is_authenticated:
         refreshList()
-        return render_template('parent.html')
+        return render_template('parent.html', form=form1)
     else:
         return render_template('logIn')
 
 @app.route('/frontPage', methods=['GET', 'POST'])
 def frontPage():
+    form1 = EditProfileForm() 
     if current_user.is_authenticated:
         #print("Refreshing list")
         refreshList()
-        return render_template('parent.html')
+        return render_template('parent.html', form=form1)
     else:
         return render_template('logIn.html')
 
