@@ -1,4 +1,4 @@
-from socket import *
+from socket import socket
 import time
 
 def runArduino(person):
@@ -13,7 +13,7 @@ def runArduino(person):
     msg_txt = 'Throw away trash ASAP \n-Admin'
     msg_txt_html = "Throw away trash <b>ASAP</b>!! <br> -Admin"
 
-    #print("Currently running Arduino")
+    print("Currently running Arduino")
     while(1):
 
    #     if curtime.tm_mday == person.finish.day || curtime.tm_mon != person.finish.month:

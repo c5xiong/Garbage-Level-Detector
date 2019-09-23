@@ -38,7 +38,7 @@ def get_credentials():
 def SendMessage(sender, to, subject, msgHtml, msgPlain, attachmentFile=None):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
+    service = discovery.build('gmail', 'v1', http=http, cache_discovery=False)
     if attachmentFile:
         message1 = createMessageWithAttachment(sender, to, subject, msgHtml, msgPlain, attachmentFile)
     else: 
